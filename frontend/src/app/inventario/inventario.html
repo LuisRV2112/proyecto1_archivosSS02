@@ -1,0 +1,120 @@
+<h2>Inventario</h2>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+<div class="pestanas">
+  <button class="pestana" [class.activa]="pestana() === 'existencias'" (click)="cambiarPestana('existencias')">
+    Existencias
+  </button>
+  <button class="pestana" [class.activa]="pestana() === 'alertas'" (click)="cambiarPestana('alertas')">
+    Alertas de stock @if (alertas().length > 0) {
+      <span class="contador">{{ alertas().length }}</span>
+    }
+  </button>
+  <button class="pestana" [class.activa]="pestana() === 'kardex'" (click)="cambiarPestana('kardex')">Kardex</button>
+</div>
+
+@if (pestana() === 'existencias') {
+  <table class="tarjeta">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Categoría</th>
+        <th>Precio</th>
+        <th>Existencia</th>
+        <th>Stock mínimo</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (e of existencias(); track e.productoId) {
+        <tr [class.fila-alerta]="e.existencia <= e.stockMinimo">
+          <td>{{ e.codigo }}</td>
+          <td>{{ e.nombre }}</td>
+          <td>{{ e.categoria }}</td>
+          <td>{{ e.precioVenta | quetzales }}</td>
+          <td>{{ e.existencia }}</td>
+          <td>{{ e.stockMinimo }}</td>
+          <td><button class="boton-secundario" (click)="verKardex(e.productoId)">Kardex</button></td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (pestana() === 'alertas') {
+  <table class="tarjeta">
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Categoría</th>
+        <th>Existencia</th>
+        <th>Stock mínimo</th>
+        <th>Faltante</th>
+        <th>Nivel</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (a of alertas(); track a.productoId) {
+        <tr class="fila-alerta">
+          <td>{{ a.codigo }}</td>
+          <td>{{ a.nombre }}</td>
+          <td>{{ a.categoria }}</td>
+          <td>{{ a.existencia }}</td>
+          <td>{{ a.stockMinimo }}</td>
+          <td>{{ a.faltante }}</td>
+          <td>
+            <span class="etiqueta-nivel" [class.agotado]="a.nivel === 'AGOTADO'">{{ a.nivel }}</span>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7">No hay productos en alerta.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}
+
+@if (pestana() === 'kardex') {
+  @if (!productoSeleccionado()) {
+    <p class="tarjeta">Selecciona un producto desde la pestaña Existencias para ver su kardex.</p>
+  } @else {
+    <table class="tarjeta">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Tipo</th>
+          <th>Origen</th>
+          <th>Cantidad</th>
+          <th>Costo</th>
+          <th>Existencia resultante</th>
+          <th>Usuario</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of kardex(); track m.id) {
+          <tr>
+            <td>{{ m.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="etiqueta-tipo" [class.salida]="m.tipo === 'SALIDA'">{{ m.tipo }}</span>
+            </td>
+            <td>{{ m.origen }}</td>
+            <td>{{ m.cantidad }}</td>
+            <td>{{ m.costoUnitario | quetzales }}</td>
+            <td>{{ m.existenciaResultante }}</td>
+            <td>{{ m.usuarioUsername }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="7">Este producto no tiene movimientos.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+}

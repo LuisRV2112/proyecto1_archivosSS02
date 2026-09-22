@@ -1,0 +1,87 @@
+<div class="encabezado-modulo">
+  <h2>Clientes</h2>
+  <button class="boton" (click)="nuevo()">Nuevo cliente</button>
+</div>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+<div class="barra-filtros">
+  <input
+    type="text"
+    placeholder="Buscar por NIT o nombre..."
+    [value]="buscar()"
+    (input)="buscarCambio($any($event.target).value)"
+  />
+  <label class="filtro-check">
+    <input type="checkbox" [checked]="mostrarInactivos()" (change)="alternarInactivos()" />
+    Mostrar inactivos
+  </label>
+</div>
+
+@if (formularioVisible()) {
+  <form class="tarjeta formulario-catalogo" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <h3>{{ editando() ? 'Editar cliente' : 'Nuevo cliente' }}</h3>
+
+    <div class="rejilla">
+      <label>
+        NIT (o "CF" para consumidor final)
+        <input type="text" formControlName="nit" />
+      </label>
+      <label>
+        Nombre
+        <input type="text" formControlName="nombre" />
+      </label>
+      <label>
+        Teléfono
+        <input type="text" formControlName="telefono" />
+      </label>
+      <label>
+        Correo
+        <input type="email" formControlName="correo" />
+      </label>
+      <label class="col-ancha">
+        Dirección
+        <input type="text" formControlName="direccion" />
+      </label>
+    </div>
+
+    <div class="acciones-formulario">
+      <button type="button" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="boton" [disabled]="formulario.invalid">Guardar</button>
+    </div>
+  </form>
+}
+
+<table class="tarjeta">
+  <thead>
+    <tr>
+      <th>NIT</th>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Estado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (c of clientes(); track c.id) {
+      <tr [class.fila-inactiva]="!c.activo">
+        <td>{{ c.nit }}</td>
+        <td>{{ c.nombre }}</td>
+        <td>{{ c.telefono || '—' }}</td>
+        <td>{{ c.activo ? 'Activo' : 'Inactivo' }}</td>
+        <td class="celda-acciones">
+          <button class="boton-secundario" (click)="editar(c)">Editar</button>
+          <button class="boton-secundario" [class.boton-peligro-borde]="c.activo" (click)="cambiarEstado(c)">
+            {{ c.activo ? 'Desactivar' : 'Activar' }}
+          </button>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="5">No se encontraron clientes.</td>
+      </tr>
+    }
+  </tbody>
+</table>

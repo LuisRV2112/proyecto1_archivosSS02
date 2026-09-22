@@ -1,0 +1,71 @@
+<h2>Bitácora</h2>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+<div class="filtros">
+  <label>
+    Usuario
+    <select [(ngModel)]="usuarioId">
+      <option [ngValue]="null">Todos</option>
+      @for (u of usuarios(); track u.id) {
+        <option [ngValue]="u.id">{{ u.username }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    Módulo
+    <select [(ngModel)]="modulo">
+      <option value="">Todos</option>
+      @for (m of modulos; track m) {
+        <option [value]="m">{{ m }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    Desde
+    <input type="date" [(ngModel)]="desde" />
+  </label>
+
+  <label>
+    Hasta
+    <input type="date" [(ngModel)]="hasta" />
+  </label>
+
+  <button class="boton" (click)="consultar()">Filtrar</button>
+  <button class="boton-secundario" (click)="limpiarFiltros()">Limpiar</button>
+</div>
+
+@if (cargando()) {
+  <p>Cargando...</p>
+} @else {
+  <table class="tarjeta">
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Usuario</th>
+        <th>Módulo</th>
+        <th>Acción</th>
+        <th>Detalle</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (r of registros(); track r.id) {
+        <tr>
+          <td>{{ r.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ r.usuarioUsername || '—' }}</td>
+          <td>{{ r.modulo }}</td>
+          <td>{{ r.accion }}</td>
+          <td>{{ r.detalle }}</td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5">No hay registros con estos filtros.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

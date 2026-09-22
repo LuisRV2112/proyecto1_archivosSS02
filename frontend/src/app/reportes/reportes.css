@@ -1,0 +1,52 @@
+h2 {
+  margin-top: 0;
+}
+
+.selector-reportes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.chip.activo {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  color: white;
+}
+
+.filtros {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.filtros input,
+.filtros select {
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+}
+
+.tabla-scroll {
+  overflow-x: auto;
+  padding: 0;
+}

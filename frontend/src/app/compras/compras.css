@@ -1,0 +1,59 @@
+.encabezado-modulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.encabezado-modulo h2 {
+  margin: 0;
+}
+
+.formulario-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 820px;
+}
+
+.fila-datos {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.formulario-compra label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+  flex: 1;
+  min-width: 200px;
+}
+
+.formulario-compra select,
+.formulario-compra input {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  font-size: 0.95rem;
+}
+
+.formulario-compra table input[type='number'] {
+  width: 90px;
+}
+
+.boton-agregar {
+  align-self: flex-start;
+}
+
+.totales {
+  align-self: flex-end;
+}
+
+.total-final {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--color-primario-oscuro);
+}

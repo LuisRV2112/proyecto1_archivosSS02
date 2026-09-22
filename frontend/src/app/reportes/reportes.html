@@ -1,0 +1,72 @@
+<h2>Reportes</h2>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+<div class="selector-reportes">
+  @for (r of reportesDisponibles(); track r.id) {
+    <button class="chip" [class.activo]="reporteActivo()?.id === r.id" (click)="seleccionar(r)">
+      {{ r.etiqueta }}
+    </button>
+  }
+</div>
+
+@if (reporteActivo(); as reporte) {
+  @if (reporte.filtroFechas) {
+    <div class="filtros">
+      <label>
+        Desde
+        <input type="date" [(ngModel)]="desde" />
+      </label>
+      <label>
+        Hasta
+        <input type="date" [(ngModel)]="hasta" />
+      </label>
+      <button class="boton" (click)="ejecutar()">Filtrar</button>
+    </div>
+  }
+
+  @if (reporte.filtroPeriodo) {
+    <div class="filtros">
+      <label>
+        Período
+        <select [(ngModel)]="periodo" (ngModelChange)="ejecutar()">
+          <option value="dia">Día</option>
+          <option value="semana">Semana</option>
+          <option value="mes">Mes</option>
+          <option value="anio">Año</option>
+        </select>
+      </label>
+    </div>
+  }
+
+  @if (cargando()) {
+    <p>Cargando...</p>
+  } @else {
+    <div class="tabla-scroll tarjeta">
+      <table>
+        <thead>
+          <tr>
+            @for (col of columnas(); track col) {
+              <th>{{ etiquetaColumna(col) }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of filas(); track $index) {
+            <tr>
+              @for (col of columnas(); track col) {
+                <td>{{ fila[col] }}</td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="columnas().length || 1">Sin datos para este reporte.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+}

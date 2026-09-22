@@ -1,0 +1,100 @@
+<div class="encabezado-modulo">
+  <h2>Productos</h2>
+  <button class="boton" (click)="nuevo()">Nuevo producto</button>
+</div>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+<div class="barra-filtros">
+  <input
+    type="text"
+    placeholder="Buscar por código o nombre..."
+    [value]="buscar()"
+    (input)="buscarCambio($any($event.target).value)"
+  />
+  <label class="filtro-check">
+    <input type="checkbox" [checked]="mostrarInactivos()" (change)="alternarInactivos()" />
+    Mostrar inactivos
+  </label>
+</div>
+
+@if (formularioVisible()) {
+  <form class="tarjeta formulario-catalogo" [formGroup]="formulario" (ngSubmit)="guardar()">
+    <h3>{{ editando() ? 'Editar producto' : 'Nuevo producto' }}</h3>
+
+    <div class="rejilla">
+      <label>
+        Código
+        <input type="text" formControlName="codigo" />
+      </label>
+      <label>
+        Nombre
+        <input type="text" formControlName="nombre" />
+      </label>
+      <label class="col-ancha">
+        Descripción
+        <input type="text" formControlName="descripcion" />
+      </label>
+      <label>
+        Categoría
+        <select formControlName="categoriaId">
+          <option [ngValue]="null" disabled>Seleccione una categoría</option>
+          @for (c of categorias(); track c.id) {
+            <option [ngValue]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Precio de venta
+        <input type="number" formControlName="precioVenta" min="0.01" step="0.01" />
+      </label>
+      <label>
+        Stock mínimo
+        <input type="number" formControlName="stockMinimo" min="0" />
+      </label>
+    </div>
+
+    <div class="acciones-formulario">
+      <button type="button" class="boton-secundario" (click)="cancelar()">Cancelar</button>
+      <button type="submit" class="boton" [disabled]="formulario.invalid">Guardar</button>
+    </div>
+  </form>
+}
+
+<table class="tarjeta">
+  <thead>
+    <tr>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Categoría</th>
+      <th>Precio</th>
+      <th>Existencia</th>
+      <th>Estado</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of productos(); track p.id) {
+      <tr [class.fila-inactiva]="!p.activo">
+        <td>{{ p.codigo }}</td>
+        <td>{{ p.nombre }}</td>
+        <td>{{ p.categoriaNombre }}</td>
+        <td>{{ p.precioVenta | quetzales }}</td>
+        <td>{{ p.existencia }}</td>
+        <td>{{ p.activo ? 'Activo' : 'Inactivo' }}</td>
+        <td class="celda-acciones">
+          <button class="boton-secundario" (click)="editar(p)">Editar</button>
+          <button class="boton-secundario" [class.boton-peligro-borde]="p.activo" (click)="cambiarEstado(p)">
+            {{ p.activo ? 'Desactivar' : 'Activar' }}
+          </button>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="7">No se encontraron productos.</td>
+      </tr>
+    }
+  </tbody>
+</table>

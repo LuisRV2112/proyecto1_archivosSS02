@@ -1,0 +1,99 @@
+<div class="encabezado-modulo">
+  <h2>Ventas</h2>
+  @if (modo() === 'lista') {
+    <button class="boton" (click)="nuevaVenta()">Nueva venta</button>
+  } @else {
+    <button class="boton-secundario" (click)="cancelar()">Cancelar</button>
+  }
+</div>
+
+@if (error()) {
+  <p class="mensaje-error">{{ error() }}</p>
+}
+
+@if (modo() === 'nueva') {
+  <form class="tarjeta formulario-venta" [formGroup]="formulario" (ngSubmit)="registrarVenta()">
+    <label>
+      Cliente
+      <select formControlName="clienteId">
+        <option [ngValue]="null" disabled>Seleccione un cliente</option>
+        @for (c of clientes(); track c.id) {
+          <option [ngValue]="c.id">{{ c.nombre }} ({{ c.nit }})</option>
+        }
+      </select>
+    </label>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Precio</th>
+          <th>Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody formArrayName="lineas">
+        @for (linea of lineas.controls; track linea; let i = $index) {
+          <tr [formGroupName]="i">
+            <td>
+              <select formControlName="productoId">
+                <option [ngValue]="null" disabled>Seleccione un producto</option>
+                @for (p of productos(); track p.id) {
+                  <option [ngValue]="p.id">{{ p.codigo }} - {{ p.nombre }} (existencia: {{ p.existencia }})</option>
+                }
+              </select>
+            </td>
+            <td><input type="number" formControlName="cantidad" min="1" /></td>
+            <td>{{ precioDe(linea.value.productoId) | quetzales }}</td>
+            <td>{{ subtotalLinea(linea.value.productoId, linea.value.cantidad) | quetzales }}</td>
+            <td>
+              @if (lineas.length > 1) {
+                <button type="button" class="boton-secundario" (click)="quitarLinea(i)">Quitar</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <button type="button" class="boton-secundario boton-agregar" (click)="agregarLinea()">+ Agregar línea</button>
+
+    <div class="totales">
+      <p>Subtotal: {{ subtotal() | quetzales }}</p>
+      <p>IVA (12%): {{ iva() | quetzales }}</p>
+      <p class="total-final">Total: {{ total() | quetzales }}</p>
+    </div>
+
+    <button type="submit" class="boton" [disabled]="formulario.invalid || cargando()">
+      {{ cargando() ? 'Registrando...' : 'Registrar venta' }}
+    </button>
+  </form>
+} @else {
+  <table class="tarjeta">
+    <thead>
+      <tr>
+        <th>Factura</th>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Total</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (v of ventas(); track v.id) {
+        <tr>
+          <td>{{ v.numeroFactura }}</td>
+          <td>{{ v.fecha | date: 'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ v.clienteNombre }} ({{ v.clienteNit }})</td>
+          <td>{{ v.total | quetzales }}</td>
+          <td><button class="boton-secundario" (click)="descargarFactura(v)">Factura PDF</button></td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="5">No hay ventas registradas.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

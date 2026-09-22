@@ -93,3 +93,103 @@ th {
   padding: 0.6rem 0.9rem;
   font-size: 0.9rem;
 }
+
+/* Patron comun a los modulos de catalogo (Productos, Clientes, Proveedores,
+   Categorias): encabezado + filtros + formulario colapsable + tabla */
+
+.encabezado-modulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.encabezado-modulo h2 {
+  margin: 0;
+}
+
+.barra-filtros {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.barra-filtros input[type='text'] {
+  flex: 1;
+  max-width: 320px;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  font-size: 0.9rem;
+}
+
+.filtro-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--color-texto-suave);
+  white-space: nowrap;
+}
+
+.formulario-catalogo {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 640px;
+}
+
+.formulario-catalogo h3 {
+  margin: 0;
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.rejilla label,
+.formulario-catalogo label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--color-texto-suave);
+}
+
+.rejilla .col-ancha {
+  grid-column: 1 / -1;
+}
+
+.rejilla input,
+.rejilla select,
+.formulario-catalogo input,
+.formulario-catalogo select {
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  font-size: 0.95rem;
+}
+
+.acciones-formulario {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.fila-inactiva {
+  opacity: 0.55;
+}
+
+.celda-acciones {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.boton-peligro-borde {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
