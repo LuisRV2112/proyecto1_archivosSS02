@@ -24,8 +24,6 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    // Roles tal como se guardan en la tabla rol (sin el prefijo ROLE_, que
-    // Spring Security agrega solo al usar hasRole/hasAnyRole)
     private static final String ADMINISTRACION = "ADMINISTRACION";
     private static final String COMPRAS = "COMPRAS";
     private static final String INVENTARIO = "INVENTARIO";
@@ -57,9 +55,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // No hay cookies de sesion: cada peticion se autentica con su
-                // propio JWT en el header Authorization, asi que no existe el
-                // estado de sesion que un ataque CSRF necesita explotar.
+
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -71,17 +67,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/yo").authenticated()
 
-                        // Usuarios y bitacora: solo ADMINISTRACION (tabla, seccion 6)
                         .requestMatchers("/api/usuarios/**").hasRole(ADMINISTRACION)
                         .requestMatchers("/api/bitacora/**").hasRole(ADMINISTRACION)
 
-                        // Categorias: la lectura la necesitan las 4 areas (para listas
-                        // desplegables de productos); solo ADMIN e INVENTARIO escriben
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**")
                         .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)
                         .requestMatchers("/api/categorias/**").hasAnyRole(ADMINISTRACION, INVENTARIO)
 
-                        // Productos: lectura para las 4 areas, escritura solo ADMIN/INVENTARIO
                         .requestMatchers(HttpMethod.GET, "/api/productos/**")
                         .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)
                         .requestMatchers("/api/productos/**").hasAnyRole(ADMINISTRACION, INVENTARIO)
@@ -89,8 +81,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/proveedores/**").hasAnyRole(ADMINISTRACION, COMPRAS)
                         .requestMatchers("/api/compras/**").hasAnyRole(ADMINISTRACION, COMPRAS)
 
-                        // Alertas de stock: VENTAS no las tiene (tabla, seccion 6).
-                        // Existencias y kardex si son solo de lectura para las 4 areas.
                         .requestMatchers("/api/inventario/alertas").hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO)
                         .requestMatchers("/api/inventario/**")
                         .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)

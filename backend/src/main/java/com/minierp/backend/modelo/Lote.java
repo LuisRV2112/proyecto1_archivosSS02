@@ -14,9 +14,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Una capa de inventario por cada linea de compra: su propio costo y fecha de
-// ingreso. Es la base del metodo PEPS (ver LoteRepositorio para el consumo
-// ordenado del mas antiguo al mas reciente).
 @Entity
 @Table(name = "lote")
 public class Lote {

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
-// Solo ADMINISTRACION (SecurityConfig, /api/bitacora/**)
 @RestController
 @RequestMapping("/api/bitacora")
 public class BitacoraControlador {

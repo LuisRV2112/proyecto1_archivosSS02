@@ -8,9 +8,6 @@ import org.hibernate.annotations.Immutable;
 
 import java.math.BigDecimal;
 
-// Mapea la vista v_existencia (V3__vistas.sql). Es de solo lectura: @Immutable
-// evita que Hibernate intente hacer INSERT/UPDATE/DELETE sobre una vista, que
-// fallaria porque no tiene reglas de escritura.
 @Entity
 @Immutable
 @Table(name = "v_existencia")
@@ -37,10 +34,8 @@ public class VExistencia {
 
     private boolean activo;
 
-    // COALESCE(SUM(...), 0): SUM sobre entero da bigint en PostgreSQL
     private Long existencia;
 
-    // COALESCE(SUM(cantidad * costo), 0): numeric sin precision/escala fija
     @Column(name = "valor_inventario")
     private BigDecimal valorInventario;
 

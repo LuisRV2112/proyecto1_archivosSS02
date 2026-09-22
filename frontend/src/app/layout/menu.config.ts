@@ -6,9 +6,6 @@ export interface ItemMenu {
   roles: Rol[];
 }
 
-// Que ve cada rol en el menu lateral: replica exactamente la tabla de
-// permisos de la seccion 6 del CLAUDE.md. ADMINISTRACION aparece en todos
-// porque "puede ver todo".
 export const MENU: ItemMenu[] = [
   { etiqueta: 'Ventas', ruta: '/ventas', roles: ['ADMINISTRACION', 'VENTAS'] },
   { etiqueta: 'Compras', ruta: '/compras', roles: ['ADMINISTRACION', 'COMPRAS'] },

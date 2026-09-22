@@ -27,7 +27,6 @@ export class Proveedores {
   protected readonly editando = signal<Proveedor | null>(null);
   protected readonly formularioVisible = signal(false);
 
-  // Proveedor cuyo panel de "productos que surte" esta abierto
   protected readonly proveedorExpandido = signal<number | null>(null);
   protected readonly productosAsociados = signal<ProductoProveedor[]>([]);
 

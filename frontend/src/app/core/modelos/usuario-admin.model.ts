@@ -1,5 +1,4 @@
-// Distinto de LoginRespuesta (usuario.model.ts): esta es la forma que usa el
-// modulo de administracion de usuarios, no la sesion actual.
+
 export interface UsuarioAdmin {
   id: number;
   username: string;

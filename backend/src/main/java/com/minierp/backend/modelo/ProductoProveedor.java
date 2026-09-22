@@ -11,9 +11,6 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
-// Relacion muchos a muchos: un proveedor surte varios productos y un producto
-// puede comprarse a varios proveedores. Una compra solo puede incluir lineas
-// que existan aqui (regla 5.3 del CLAUDE.md).
 @Entity
 @Table(name = "producto_proveedor")
 public class ProductoProveedor {

@@ -5,8 +5,6 @@ import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
-// Llave compuesta de producto_proveedor: la relacion M:N no tiene un id propio,
-// se identifica por el par (producto_id, proveedor_id), igual que en la base.
 @Embeddable
 public class ProductoProveedorId implements Serializable {
 

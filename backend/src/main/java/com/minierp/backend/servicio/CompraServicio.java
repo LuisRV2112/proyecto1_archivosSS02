@@ -21,6 +21,8 @@ import com.minierp.backend.repositorio.MovimientoInventarioRepositorio;
 import com.minierp.backend.repositorio.ProductoProveedorRepositorio;
 import com.minierp.backend.repositorio.ProductoRepositorio;
 import com.minierp.backend.repositorio.ProveedorRepositorio;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,9 +62,6 @@ public class CompraServicio {
         this.bitacoraServicio = bitacoraServicio;
     }
 
-    // Flujo de compra (CLAUDE.md, seccion 5.1), en UNA sola transaccion: si
-    // cualquier linea falla (producto no surtido por el proveedor, etc.), no
-    // queda nada escrito, ni la compra ni sus lotes ni sus movimientos.
     @Transactional
     public CompraDetalladaRespuesta registrar(CompraPeticion peticion, Usuario actor) {
         Proveedor proveedor = proveedorRepositorio.findById(peticion.proveedorId())
@@ -74,7 +73,7 @@ public class CompraServicio {
         compra.setFecha(peticion.fecha());
         compra.setNumeroDocumento(peticion.numeroDocumento());
         compra.setObservaciones(peticion.observaciones());
-        compra.setTotal(BigDecimal.ZERO); // se recalcula abajo; la columna es NOT NULL
+        compra.setTotal(BigDecimal.ZERO);
         compraRepositorio.save(compra);
 
         BigDecimal total = BigDecimal.ZERO;
@@ -90,15 +89,10 @@ public class CompraServicio {
         return obtener(compra.getId());
     }
 
-    // 1. detalle_compra  2. lote (cantidad_inicial = cantidad_disponible = la
-    // cantidad comprada)  3. movimiento_inventario ENTRADA. Devuelve el
-    // subtotal de la linea para acumular el total de la compra.
     private BigDecimal registrarLinea(Compra compra, LineaCompraPeticion linea, Proveedor proveedor, Usuario actor) {
         Producto producto = productoRepositorio.findById(linea.productoId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + linea.productoId()));
 
-        // Regla 5.3 del CLAUDE.md: una compra solo puede incluir productos que
-        // ese proveedor surte
         boolean proveedorSurteProducto = productoProveedorRepositorio
                 .existsById_ProductoIdAndId_ProveedorId(producto.getId(), proveedor.getId());
         if (!proveedorSurteProducto) {
@@ -120,8 +114,7 @@ public class CompraServicio {
         lote.setCantidadInicial(linea.cantidad());
         lote.setCantidadDisponible(linea.cantidad());
         lote.setCostoUnitario(linea.costoUnitario());
-        // saveAndFlush: el SUM de sumarExistenciaPorProducto necesita ver este
-        // lote ya escrito para calcular bien la existencia_resultante
+
         loteRepositorio.saveAndFlush(lote);
 
         long existenciaResultante = loteRepositorio.sumarExistenciaPorProducto(producto.getId());
@@ -144,7 +137,20 @@ public class CompraServicio {
 
     @Transactional(readOnly = true)
     public List<CompraRespuesta> listar(Integer proveedorId, LocalDateTime desde, LocalDateTime hasta) {
-        return compraRepositorio.buscar(proveedorId, desde, hasta).stream().map(this::aRespuesta).toList();
+        Specification<Compra> especificacion = (raiz, consulta, cb) -> cb.conjunction();
+
+        if (proveedorId != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.equal(raiz.get("proveedor").get("id"), proveedorId));
+        }
+        if (desde != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.greaterThanOrEqualTo(raiz.get("fecha"), desde));
+        }
+        if (hasta != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.lessThanOrEqualTo(raiz.get("fecha"), hasta));
+        }
+
+        return compraRepositorio.findAll(especificacion, Sort.by(Sort.Direction.DESC, "fecha"))
+                .stream().map(this::aRespuesta).toList();
     }
 
     @Transactional(readOnly = true)
@@ -172,10 +178,7 @@ public class CompraServicio {
     }
 
     private DetalleCompraRespuesta aRespuestaDetalle(DetalleCompra detalle) {
-        // No se lee detalle.getSubtotal(): es GENERATED ALWAYS en la base y,
-        // dentro de la misma transaccion en que se acaba de insertar, Hibernate
-        // no la vuelve a leer (cache de primer nivel). Se calcula igual que la
-        // base: cantidad * costo_unitario.
+
         BigDecimal subtotal = detalle.getCostoUnitario().multiply(BigDecimal.valueOf(detalle.getCantidad()));
         return new DetalleCompraRespuesta(
                 detalle.getId(),

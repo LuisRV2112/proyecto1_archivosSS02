@@ -31,9 +31,6 @@ export class VentasServicio {
     return this.http.post<VentaDetallada>(this.base, peticion);
   }
 
-  // El endpoint exige el token igual que cualquier otro (interceptor de por
-  // medio), asi que no puede ser un <a href> directo: se pide como blob y se
-  // dispara la descarga manualmente.
   descargarFactura(id: number, numeroFactura: number): Observable<void> {
     return new Observable<void>((observer) => {
       this.http.get(`${this.base}/${id}/factura`, { responseType: 'blob' }).subscribe({

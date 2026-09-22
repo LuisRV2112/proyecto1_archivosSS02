@@ -21,8 +21,6 @@ public class BitacoraServicio {
         this.bitacoraRepositorio = bitacoraRepositorio;
     }
 
-    // usuario puede ser null: asi se registran los intentos de login fallidos,
-    // donde todavia no hay una sesion de un usuario real a quien atribuir la accion
     public void registrar(Usuario usuario, String modulo, String accion, String entidad, Integer entidadId, String detalle) {
         Bitacora bitacora = new Bitacora();
         bitacora.setUsuario(usuario);
@@ -35,9 +33,6 @@ public class BitacoraServicio {
         bitacoraRepositorio.save(bitacora);
     }
 
-    // Filtros de usuario, modulo y rango de fechas (Fase 6, tarea 5). Con
-    // Specification cada filtro se agrega solo si vino en la peticion, sin
-    // escribir una consulta distinta por cada combinacion posible.
     @Transactional(readOnly = true)
     public List<BitacoraRespuesta> consultar(Integer usuarioId, String modulo, LocalDateTime desde, LocalDateTime hasta) {
         Specification<Bitacora> especificacion = (raiz, consulta, cb) -> cb.conjunction();

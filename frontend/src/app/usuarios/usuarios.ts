@@ -22,8 +22,6 @@ export class Usuarios {
   protected readonly editando = signal<UsuarioAdmin | null>(null);
   protected readonly formularioVisible = signal(false);
 
-  // El username y la contrasena solo se piden al crear (UsuarioActualizacionPeticion
-  // del backend no los admite: no se pueden cambiar desde este formulario)
   protected readonly formulario = this.fb.group({
     username: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(8)]],
@@ -53,7 +51,7 @@ export class Usuarios {
       nombreCompleto: usuario.nombreCompleto,
       rolId: rolActual?.id ?? null,
     });
-    // Al editar, username y password no se envian (backend no los acepta aqui)
+
     this.formulario.get('username')!.disable();
     this.formulario.get('password')!.disable();
     this.formularioVisible.set(true);

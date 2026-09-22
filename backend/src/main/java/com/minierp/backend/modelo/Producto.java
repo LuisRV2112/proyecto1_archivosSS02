@@ -13,9 +13,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// La existencia NO es un campo de esta entidad: se calcula sumando los lotes
-// disponibles (ver VExistencia, que mapea la vista v_existencia). Agregar aqui
-// un campo "existencia" duplicaria la fuente de verdad.
 @Entity
 @Table(name = "producto")
 public class Producto {
@@ -43,7 +40,6 @@ public class Producto {
     @Column(name = "stock_minimo", nullable = false)
     private Integer stockMinimo;
 
-    // Borrado logico: al desactivar un producto su historial se conserva intacto
     @Column(nullable = false)
     private boolean activo = true;
 

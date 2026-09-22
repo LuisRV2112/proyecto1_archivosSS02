@@ -30,15 +30,10 @@ public class AutenticacionServicio {
 
     public LoginRespuesta login(String username, String password) {
         try {
-            // Delega en el AuthenticationManager (DaoAuthenticationProvider):
-            // compara el password con BCrypt y, de paso, revisa isEnabled()
-            // (usuario.activo) automaticamente, lanzando DisabledException si
-            // esta desactivado.
+
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (AuthenticationException excepcionAutenticacion) {
-            // No se distingue "usuario no existe" de "password incorrecto": se
-            // registra sin usuario (bitacora.usuario_id admite NULL justo para
-            // este caso), para no filtrar por bitacora que usernames existen.
+
             bitacoraServicio.registrar(null, "AUTENTICACION", "LOGIN_FALLIDO", "usuario", null,
                     "Intento de login fallido para username '" + username + "'");
             throw excepcionAutenticacion;

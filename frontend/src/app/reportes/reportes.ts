@@ -14,10 +14,6 @@ interface DefinicionReporte {
   filtroPeriodo?: boolean;
 }
 
-// Coincide con los 12 reportes de la seccion 7 del CLAUDE.md (el kardex de
-// producto -reporte 4- y las compras/ventas por fecha -5 y 8- viven en sus
-// propios modulos: Inventario y Compras/Ventas). Los roles replican la
-// tabla de permisos de la seccion 6.
 const REPORTES: DefinicionReporte[] = [
   { id: 'productos-mas-vendidos', etiqueta: 'Top 10 productos más vendidos', roles: ['ADMINISTRACION', 'INVENTARIO'] },
   {

@@ -16,8 +16,6 @@ import java.util.List;
 @Service
 public class ClienteServicio {
 
-    // 'CF' = consumidor final: muchos clientes lo comparten (regla 4.NIT del
-    // CLAUDE.md), asi que nunca se valida como duplicado
     private static final String NIT_CONSUMIDOR_FINAL = "CF";
 
     private final ClienteRepositorio clienteRepositorio;
@@ -93,8 +91,6 @@ public class ClienteServicio {
         return aRespuesta(cliente);
     }
 
-    // idExcluido es null al crear; al actualizar, excluye el propio registro
-    // para que un cliente no choque con su propio NIT sin cambios
     private void validarNitUnico(String nit, Integer idExcluido) {
         if (NIT_CONSUMIDOR_FINAL.equals(nit)) {
             return;

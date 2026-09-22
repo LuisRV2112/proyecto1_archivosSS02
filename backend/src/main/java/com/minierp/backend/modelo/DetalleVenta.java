@@ -12,9 +12,6 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
-// El precio se guarda AL MOMENTO de vender (no se lee del producto en consultas
-// posteriores): si el precio del producto cambia despues, una factura vieja no
-// debe cambiar con el.
 @Entity
 @Table(name = "detalle_venta")
 public class DetalleVenta {
@@ -37,7 +34,6 @@ public class DetalleVenta {
     @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 
-    // GENERATED ALWAYS AS (cantidad * precio_unitario) STORED en la base
     @Column(insertable = false, updatable = false, precision = 14, scale = 2)
     private BigDecimal subtotal;
 

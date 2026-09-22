@@ -11,11 +11,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
-// Maneja las excepciones que ocurren DENTRO de un controlador (validacion,
-// login fallido, errores inesperados). Las que ocurren en la cadena de
-// filtros de Spring Security (token ausente/invalido, rol sin permiso) no
-// llegan aqui: las maneja JwtAutenticacionEntryPoint y
-// JwtAccesoDenegadoManejador, con el mismo formato de error.
 @RestControllerAdvice
 public class ManejadorGlobalExcepciones {
 
@@ -28,8 +23,6 @@ public class ManejadorGlobalExcepciones {
         return ErrorRespuesta.de(400, "Datos invalidos", detalle);
     }
 
-    // Cubre BadCredentialsException (password incorrecto) y
-    // DisabledException (usuario inactivo), lanzadas desde AutenticacionServicio
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorRespuesta manejarAutenticacion(AuthenticationException ex) {

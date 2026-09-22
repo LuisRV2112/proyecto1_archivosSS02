@@ -73,7 +73,7 @@ public class ProductoServicio {
 
         bitacoraServicio.registrar(actor, "PRODUCTOS", "CREACION", "producto", producto.getId(),
                 "Producto creado: " + producto.getCodigo() + " - " + producto.getNombre());
-        // Un producto recien creado no tiene lotes todavia
+
         return aRespuesta(producto, 0L);
     }
 
@@ -108,8 +108,7 @@ public class ProductoServicio {
     }
 
     private ProductoRespuesta cambiarEstado(Integer id, boolean activo, Usuario actor) {
-        // Borrado logico: nunca se hace DELETE. El historial (compras, ventas,
-        // kardex) que referencia este producto queda intacto.
+
         Producto producto = obtenerEntidad(id);
         producto.setActivo(activo);
 

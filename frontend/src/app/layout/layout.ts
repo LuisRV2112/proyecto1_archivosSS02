@@ -10,7 +10,7 @@ import { MENU } from './menu.config';
   styleUrl: './layout.css',
 })
 export class Layout {
-  // Solo las opciones que el rol actual tiene permitidas (tabla, seccion 6)
+
   protected readonly menu = computed(() => {
     const rolActual = this.auth.rol();
     return MENU.filter((item) => rolActual !== null && item.roles.includes(rolActual));

@@ -20,7 +20,6 @@ public class Bitacora {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // NULL en intentos de login fallidos (no se sabe que usuario es todavia)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;

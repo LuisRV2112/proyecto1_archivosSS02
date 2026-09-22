@@ -21,8 +21,6 @@ public class Venta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // La asigna la secuencia seq_numero_factura (DEFAULT en la base), nunca el
-    // backend. Se lee despues del save + flush, no antes.
     @Column(name = "numero_factura", insertable = false, updatable = false)
     private Integer numeroFactura;
 
@@ -40,7 +38,6 @@ public class Venta {
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal subtotal;
 
-    // IVA del 12% (Guatemala)
     @Column(nullable = false, precision = 14, scale = 2)
     private BigDecimal iva;
 

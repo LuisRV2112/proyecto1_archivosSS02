@@ -21,7 +21,6 @@ public class Categoria {
     @Column(length = 200)
     private String descripcion;
 
-    // Borrado logico: nunca se hace DELETE sobre categoria
     @Column(nullable = false)
     private boolean activo = true;
 

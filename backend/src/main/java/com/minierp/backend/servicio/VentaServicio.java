@@ -24,6 +24,8 @@ import com.minierp.backend.repositorio.MovimientoInventarioRepositorio;
 import com.minierp.backend.repositorio.ProductoRepositorio;
 import com.minierp.backend.repositorio.VentaRepositorio;
 import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +38,6 @@ import java.util.List;
 @Service
 public class VentaServicio {
 
-    // IVA de Guatemala (CLAUDE.md, seccion 5.1)
     private static final BigDecimal TASA_IVA = new BigDecimal("0.12");
 
     private final VentaRepositorio ventaRepositorio;
@@ -70,10 +71,6 @@ public class VentaServicio {
         this.entityManager = entityManager;
     }
 
-    // Toda la venta es UNA transaccion (CLAUDE.md, seccion 5.1): si cualquier
-    // linea falla -existencia insuficiente, producto inactivo, etc.- Spring
-    // revierte todo lo que esta funcion haya escrito hasta ese punto (nada de
-    // detalle_venta, lote ni movimiento_inventario queda a medias).
     @Transactional
     public VentaDetalladaRespuesta registrar(VentaPeticion peticion, Usuario actor) {
         Cliente cliente = clienteRepositorio.findById(peticion.clienteId())
@@ -87,8 +84,7 @@ public class VentaServicio {
         venta.setCliente(cliente);
         venta.setUsuario(actor);
         venta.setFecha(LocalDateTime.now());
-        // subtotal/iva/total son NOT NULL en la base; se recalculan abajo con
-        // el total real de las lineas
+
         venta.setSubtotal(BigDecimal.ZERO);
         venta.setIva(BigDecimal.ZERO);
         venta.setTotal(BigDecimal.ZERO);
@@ -110,10 +106,7 @@ public class VentaServicio {
         venta.setIva(iva);
         venta.setTotal(total);
         ventaRepositorio.saveAndFlush(venta);
-        // numero_factura no es insertable (lo asigna seq_numero_factura como
-        // DEFAULT de la columna, CLAUDE.md seccion 4): Hibernate nunca lo
-        // manda en el INSERT, asi que el objeto en memoria no lo tiene hasta
-        // que se refresca desde la base, ya con el flush hecho.
+
         entityManager.refresh(venta);
 
         bitacoraServicio.registrar(actor, "VENTAS", "CREACION", "venta", venta.getId(),
@@ -122,9 +115,6 @@ public class VentaServicio {
         return new VentaDetalladaRespuesta(aRespuesta(venta), detallesRespuesta);
     }
 
-    // El metodo PEPS: para una linea (un producto, una cantidad), consume los
-    // lotes de ese producto del mas antiguo al mas reciente hasta cubrir la
-    // cantidad pedida, tocando varios lotes si el primero no alcanza.
     private DetalleVentaRespuesta registrarLinea(Venta venta, LineaVentaPeticion lineaPeticion, Usuario actor) {
         Producto producto = productoRepositorio.findById(lineaPeticion.productoId())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Producto no encontrado: " + lineaPeticion.productoId()));
@@ -135,30 +125,16 @@ public class VentaServicio {
 
         int cantidadSolicitada = lineaPeticion.cantidad();
 
-        // PASO 1 y bloqueo pesimista: se traen los lotes del producto con
-        // saldo (cantidad_disponible > 0), ordenados por fecha_ingreso y luego
-        // id -el mas antiguo primero, que es la esencia de PEPS-, y quedan
-        // bloqueados con SELECT ... FOR UPDATE hasta que esta transaccion
-        // termine. Es el problema clasico de acceso concurrente visto en
-        // clase: si dos vendedores intentan vender el ultimo producto
-        // disponible al mismo tiempo, el segundo tiene que ESPERAR a que el
-        // primero termine (commit o rollback) antes de poder leer el saldo
-        // real; sin este bloqueo, ambos podrian leer "hay 1 disponible" y
-        // los dos lo venderian, dejando la existencia en -1.
         List<Lote> lotesDisponibles = loteRepositorio.buscarConExistenciaParaActualizar(producto.getId());
 
         long existenciaTotal = lotesDisponibles.stream().mapToLong(Lote::getCantidadDisponible).sum();
         if (existenciaTotal < cantidadSolicitada) {
-            // Rechaza TODA la venta (la excepcion revierte la transaccion
-            // completa), indicando producto, cantidad pedida y disponible
+
             throw new ReglaNegocioException("Existencia insuficiente",
                     "Producto '" + producto.getCodigo() + "': solicitado " + cantidadSolicitada
                             + ", disponible " + existenciaTotal);
         }
 
-        // El precio se toma del producto EN ESTE MOMENTO y se congela en el
-        // detalle: si el precio del producto cambia despues, esta factura ya
-        // emitida no debe cambiar con el (CLAUDE.md, seccion 4)
         BigDecimal precioUnitario = producto.getPrecioVenta();
 
         DetalleVenta detalle = new DetalleVenta();
@@ -168,11 +144,6 @@ public class VentaServicio {
         detalle.setPrecioUnitario(precioUnitario);
         detalleVentaRepositorio.save(detalle);
 
-        // PASOS 2, 3 y 4: recorre los lotes ya ordenados del mas viejo al mas
-        // nuevo. De cada uno se consume lo que tenga disponible hasta cubrir
-        // "pendiente"; si un lote no alcanza, se agota (queda en 0) y se pasa
-        // al siguiente. Por cada lote tocado se deja registro de trazabilidad
-        // (detalle_venta_lote) y de kardex (movimiento_inventario SALIDA).
         int pendiente = cantidadSolicitada;
         List<LoteConsumidoRespuesta> lotesConsumidos = new ArrayList<>();
         for (Lote lote : lotesDisponibles) {
@@ -182,8 +153,7 @@ public class VentaServicio {
             int consumidoDeEsteLote = Math.min(pendiente, lote.getCantidadDisponible());
             lote.setCantidadDisponible(lote.getCantidadDisponible() - consumidoDeEsteLote);
             pendiente -= consumidoDeEsteLote;
-            // flush inmediato: el SUM de existencia total (mas abajo) tiene
-            // que ver este descuento ya escrito, no solo en memoria
+
             loteRepositorio.saveAndFlush(lote);
 
             DetalleVentaLote consumo = new DetalleVentaLote();
@@ -220,7 +190,20 @@ public class VentaServicio {
 
     @Transactional(readOnly = true)
     public List<VentaRespuesta> listar(Integer clienteId, LocalDateTime desde, LocalDateTime hasta) {
-        return ventaRepositorio.buscar(clienteId, desde, hasta).stream().map(this::aRespuesta).toList();
+        Specification<Venta> especificacion = (raiz, consulta, cb) -> cb.conjunction();
+
+        if (clienteId != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.equal(raiz.get("cliente").get("id"), clienteId));
+        }
+        if (desde != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.greaterThanOrEqualTo(raiz.get("fecha"), desde));
+        }
+        if (hasta != null) {
+            especificacion = especificacion.and((raiz, consulta, cb) -> cb.lessThanOrEqualTo(raiz.get("fecha"), hasta));
+        }
+
+        return ventaRepositorio.findAll(especificacion, Sort.by(Sort.Direction.DESC, "fecha"))
+                .stream().map(this::aRespuesta).toList();
     }
 
     @Transactional(readOnly = true)
@@ -242,8 +225,7 @@ public class VentaServicio {
                 .map(dvl -> new LoteConsumidoRespuesta(
                         dvl.getLote().getId(), dvl.getLote().getFechaIngreso(), dvl.getCantidad(), dvl.getCostoUnitario()))
                 .toList();
-        // detalle.getSubtotal() ya es visible: esta consulta corre en una
-        // transaccion nueva, distinta de la que inserto el detalle
+
         return new DetalleVentaRespuesta(
                 detalle.getId(), detalle.getProducto().getId(), detalle.getProducto().getCodigo(),
                 detalle.getProducto().getNombre(), detalle.getCantidad(), detalle.getPrecioUnitario(),

@@ -13,9 +13,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Kardex: cada entrada o salida queda registrada con su ORIGEN, para saber como
-// y por que cambio la existencia de un producto (requisito explicito del
-// enunciado).
 @Entity
 @Table(name = "movimiento_inventario")
 public class MovimientoInventario {
@@ -32,15 +29,12 @@ public class MovimientoInventario {
     @JoinColumn(name = "lote_id")
     private Lote lote;
 
-    // 'ENTRADA' o 'SALIDA'
     @Column(nullable = false, length = 10)
     private String tipo;
 
-    // 'COMPRA', 'VENTA' o 'AJUSTE'
     @Column(nullable = false, length = 10)
     private String origen;
 
-    // Id de la compra o de la venta que origino el movimiento
     @Column(name = "referencia_id")
     private Integer referenciaId;
 

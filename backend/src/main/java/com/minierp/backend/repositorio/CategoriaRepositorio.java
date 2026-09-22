@@ -11,12 +11,8 @@ public interface CategoriaRepositorio extends JpaRepository<Categoria, Integer> 
 
     boolean existsByNombre(String nombre);
 
-    // Excluye el propio registro: al actualizar, una categoria no choca consigo misma
     boolean existsByNombreAndIdNot(String nombre, Integer id);
 
-    // CAST(:buscar AS string): sin el cast, PostgreSQL no puede inferir el tipo
-    // del parametro cuando llega null (para "sin filtro de busqueda") dentro de
-    // LOWER(?), y falla con "function lower(bytea) does not exist"
     @Query("""
             SELECT c FROM Categoria c
             WHERE (:activo IS NULL OR c.activo = :activo)

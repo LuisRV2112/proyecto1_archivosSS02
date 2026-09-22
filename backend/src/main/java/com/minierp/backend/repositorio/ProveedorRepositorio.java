@@ -9,12 +9,10 @@ import java.util.List;
 
 public interface ProveedorRepositorio extends JpaRepository<Proveedor, Integer> {
 
-    // Para el mensaje claro de NIT duplicado (Fase 3)
     boolean existsByNit(String nit);
 
     boolean existsByNitAndIdNot(String nit, Integer id);
 
-    // CAST(:buscar AS string): ver el comentario en CategoriaRepositorio.buscar
     @Query("""
             SELECT p FROM Proveedor p
             WHERE (:activo IS NULL OR p.activo = :activo)

@@ -12,8 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 
-// Genera y valida los JWT. La clave y la expiracion vienen de
-// application.properties (nunca fijas en el codigo), como pide la Fase 2.
 @Component
 public class JwtServicio {
 
@@ -48,7 +46,6 @@ public class JwtServicio {
         return parsearClaims(token).get(CLAVE_ROL, String.class);
     }
 
-    // true solo si la firma es valida y el token no ha expirado
     public boolean esValido(String token) {
         try {
             parsearClaims(token);

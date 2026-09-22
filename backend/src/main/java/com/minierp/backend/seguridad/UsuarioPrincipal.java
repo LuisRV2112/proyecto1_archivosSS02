@@ -8,8 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-// Envuelve la entidad Usuario para que Spring Security pueda autenticarla y
-// autorizarla, sin exponer la entidad JPA directamente al resto del sistema.
 public class UsuarioPrincipal implements UserDetails {
 
     private final Usuario usuario;
@@ -24,8 +22,7 @@ public class UsuarioPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Spring Security espera el prefijo "ROLE_" para que hasRole(...)
-        // funcione; en la base el rol se guarda sin el (ADMINISTRACION, etc.)
+
         return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().getNombre()));
     }
 
@@ -54,10 +51,6 @@ public class UsuarioPrincipal implements UserDetails {
         return true;
     }
 
-    // Un usuario desactivado no puede autenticarse aunque la contrasena sea
-    // correcta: Spring Security revisa este metodo automaticamente durante la
-    // autenticacion (DisabledException) y tambien en cada peticion, en
-    // JwtAutenticacionFiltro.
     @Override
     public boolean isEnabled() {
         return usuario.isActivo();

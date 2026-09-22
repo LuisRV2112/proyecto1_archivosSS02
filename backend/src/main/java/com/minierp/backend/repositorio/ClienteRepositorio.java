@@ -9,13 +9,10 @@ import java.util.List;
 
 public interface ClienteRepositorio extends JpaRepository<Cliente, Integer> {
 
-    // Para el mensaje claro de NIT duplicado. El servicio (ClienteServicio)
-    // ignora este chequeo cuando el NIT es 'CF', que si puede repetirse.
     boolean existsByNit(String nit);
 
     boolean existsByNitAndIdNot(String nit, Integer id);
 
-    // CAST(:buscar AS string): ver el comentario en CategoriaRepositorio.buscar
     @Query("""
             SELECT c FROM Cliente c
             WHERE (:activo IS NULL OR c.activo = :activo)

@@ -28,8 +28,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
-// Genera la factura de una venta en PDF con OpenPDF (no iText: su licencia
-// AGPL no es apropiada aqui, CLAUDE.md seccion 1.2).
 @Service
 public class FacturaServicio {
 
@@ -54,9 +52,6 @@ public class FacturaServicio {
         this.bitacoraServicio = bitacoraServicio;
     }
 
-    // No es readOnly: ademas de leer la venta, escribe en bitacora
-    // (registrar la factura generada), y Postgres rechaza un INSERT dentro de
-    // una transaccion marcada de solo lectura.
     @Transactional
     public byte[] generar(Integer ventaId, Usuario actor) {
         Venta venta = ventaServicio.obtenerEntidad(ventaId);

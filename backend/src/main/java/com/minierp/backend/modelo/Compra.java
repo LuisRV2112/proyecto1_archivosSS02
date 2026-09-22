@@ -32,7 +32,6 @@ public class Compra {
     @Column(nullable = false)
     private LocalDateTime fecha;
 
-    // Numero de factura del proveedor, no el de nuestras ventas
     @Column(name = "numero_documento", length = 30)
     private String numeroDocumento;
 

@@ -94,9 +94,6 @@ th {
   font-size: 0.9rem;
 }
 
-/* Patron comun a los modulos de catalogo (Productos, Clientes, Proveedores,
-   Categorias): encabezado + filtros + formulario colapsable + tabla */
-
 .encabezado-modulo {
   display: flex;
   align-items: center;

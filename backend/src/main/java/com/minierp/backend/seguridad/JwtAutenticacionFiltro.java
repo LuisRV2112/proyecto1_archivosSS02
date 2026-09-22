@@ -15,10 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-// Lee el header "Authorization: Bearer <token>" en cada peticion. Si el token
-// es valido, vuelve a cargar el usuario desde la base (no se confia solo en lo
-// que dice el token) para que una desactivacion o un cambio de rol tengan
-// efecto inmediato, en vez de esperar a que el token expire (hasta 8 horas).
 @Component
 public class JwtAutenticacionFiltro extends OncePerRequestFilter {
 
@@ -52,9 +48,7 @@ public class JwtAutenticacionFiltro extends OncePerRequestFilter {
                         SecurityContextHolder.getContext().setAuthentication(autenticacion);
                     }
                 } catch (UsernameNotFoundException e) {
-                    // Token valido pero el usuario ya no existe: se deja la
-                    // peticion sin autenticar, el filtro de autorizacion la
-                    // rechazara mas adelante.
+
                 }
             }
         }

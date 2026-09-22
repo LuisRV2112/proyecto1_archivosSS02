@@ -34,8 +34,6 @@ public class DetalleCompra {
     @Column(name = "costo_unitario", nullable = false, precision = 12, scale = 2)
     private BigDecimal costoUnitario;
 
-    // GENERATED ALWAYS AS (cantidad * costo_unitario) STORED en la base: Hibernate
-    // nunca la escribe, solo la lee de vuelta.
     @Column(insertable = false, updatable = false, precision = 14, scale = 2)
     private BigDecimal subtotal;
 

@@ -9,8 +9,7 @@ const CLAVE_STORAGE = 'minierp_sesion';
 
 @Injectable({ providedIn: 'root' })
 export class AutenticacionServicio {
-  // Signal inicializado desde localStorage: si el usuario recarga la pagina,
-  // sigue con su sesion en vez de volver al login
+
   private readonly sesion = signal<LoginRespuesta | null>(this.leerSesionGuardada());
 
   readonly usuario = computed(() => this.sesion());

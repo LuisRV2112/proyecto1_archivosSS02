@@ -17,9 +17,6 @@ public class Cliente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // 'CF' = consumidor final. NO es unique aqui: la base lo garantiza con un
-    // indice unico PARCIAL (uq_cliente_nit) que excluye 'CF', porque muchos
-    // clientes compran como consumidor final y todos comparten ese valor.
     @Column(nullable = false, length = 15)
     private String nit;
 

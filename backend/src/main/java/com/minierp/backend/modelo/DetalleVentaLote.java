@@ -12,9 +12,6 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 
-// Trazabilidad PEPS: de que lote(s) salio cada linea de venta. Una linea puede
-// consumir varios lotes si el mas antiguo no alcanza; con esto se puede probar
-// (y auditar oralmente) que se respeto el orden PEPS.
 @Entity
 @Table(name = "detalle_venta_lote")
 public class DetalleVentaLote {

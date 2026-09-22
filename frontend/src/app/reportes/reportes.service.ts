@@ -3,9 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_URL } from '../core/api-url';
 
-// Cada reporte devuelve una forma distinta de fila; la tabla del componente
-// se arma dinamicamente a partir de las claves del primer registro, asi que
-// aqui basta un tipo generico.
 export type FilaReporte = Record<string, string | number | boolean | null>;
 
 @Injectable({ providedIn: 'root' })

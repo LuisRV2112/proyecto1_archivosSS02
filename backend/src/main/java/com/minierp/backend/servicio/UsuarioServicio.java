@@ -55,7 +55,7 @@ public class UsuarioServicio {
 
         Usuario usuario = new Usuario();
         usuario.setUsername(peticion.username());
-        // BCrypt, nunca texto plano (CLAUDE.md, seccion 4)
+
         usuario.setPasswordHash(passwordEncoder.encode(peticion.password()));
         usuario.setNombreCompleto(peticion.nombreCompleto());
         usuario.setRol(rol);
@@ -92,9 +92,7 @@ public class UsuarioServicio {
     }
 
     private UsuarioRespuesta cambiarEstado(Integer id, boolean activo, Usuario actor) {
-        // Borrado logico: nunca DELETE. Un usuario desactivado no puede
-        // autenticarse (ver UsuarioPrincipal.isEnabled, Fase 2) pero su
-        // historial en compras/ventas/bitacora se conserva.
+
         Usuario usuario = obtenerEntidad(id);
         usuario.setActivo(activo);
 

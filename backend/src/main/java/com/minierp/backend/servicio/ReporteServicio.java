@@ -19,18 +19,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Los 12 reportes del enunciado (CLAUDE.md, seccion 7), todos con SQL nativo:
-// son consultas de agregacion (SUM, COUNT, date_trunc) que se leen mas claro
-// en SQL directo que traducidas a JPQL, y el enunciado lo permite
-// explicitamente (@Query(nativeQuery = true) o JdbcTemplate).
 @Service
 public class ReporteServicio {
-
-    // "WHERE 1=1" + AND condicionales en vez de "(:param IS NULL OR ...)":
-    // evita por completo el problema de inferencia de tipos de PostgreSQL con
-    // parametros null (ver comentarios en CategoriaRepositorio y
-    // CompraRepositorio) porque un filtro que no se usa simplemente nunca se
-    // agrega a la consulta ni se manda como parametro.
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -38,9 +28,6 @@ public class ReporteServicio {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // ---------------- Productos e inventario ----------------
-
-    // 1. Top 10 productos mas vendidos, por unidades
     public List<ReporteProductoVendidoRespuesta> productosMasVendidos() {
         String sql = """
                 SELECT p.id AS producto_id, p.codigo, p.nombre, COALESCE(SUM(dv.cantidad), 0) AS unidades
@@ -54,9 +41,6 @@ public class ReporteServicio {
                 rs.getInt("producto_id"), rs.getString("codigo"), rs.getString("nombre"), rs.getLong("unidades")));
     }
 
-    // 2. Productos con menor existencia disponible. Se lee directo de
-    // v_existencia (ya calcula la suma de lotes correctamente) en vez de
-    // repetir esa logica aqui.
     public List<ExistenciaRespuesta> productosMenorExistencia() {
         String sql = """
                 SELECT producto_id, codigo, nombre, categoria, precio_venta, stock_minimo, activo, existencia, valor_inventario
@@ -69,7 +53,6 @@ public class ReporteServicio {
                 rs.getLong("existencia"), rs.getBigDecimal("valor_inventario")));
     }
 
-    // 3. Productos con mayor cantidad de movimientos (entradas + salidas)
     public List<ReporteProductoMovimientosRespuesta> productosMasMovimientos() {
         String sql = """
                 SELECT p.id AS producto_id, p.codigo, p.nombre, COUNT(mi.id) AS cantidad_movimientos
@@ -82,7 +65,6 @@ public class ReporteServicio {
                 rs.getInt("producto_id"), rs.getString("codigo"), rs.getString("nombre"), rs.getLong("cantidad_movimientos")));
     }
 
-    // 4. Kardex de un producto: mismo query que InventarioServicio.kardex (Fase 4)
     public List<KardexRespuesta> kardexProducto(Integer productoId) {
         String sql = """
                 SELECT mi.id, mi.fecha, mi.tipo, mi.origen, mi.referencia_id, mi.lote_id, mi.cantidad,
@@ -99,9 +81,6 @@ public class ReporteServicio {
                 productoId);
     }
 
-    // ---------------- Compras y proveedores ----------------
-
-    // 5. Compras dentro de un rango de fechas
     public List<CompraRespuesta> comprasEnRango(LocalDateTime desde, LocalDateTime hasta) {
         StringBuilder sql = new StringBuilder("""
                 SELECT c.id, c.proveedor_id, pr.nombre AS proveedor_nombre, u.username AS usuario_username,
@@ -129,7 +108,6 @@ public class ReporteServicio {
                 parametros.toArray());
     }
 
-    // 6. Top 5 proveedores con mayor monto acumulado de compras
     public List<ReporteProveedorTopRespuesta> proveedoresTop() {
         String sql = """
                 SELECT p.id AS proveedor_id, p.nombre, p.nit, COALESCE(SUM(c.total), 0) AS monto_acumulado,
@@ -145,7 +123,6 @@ public class ReporteServicio {
                 rs.getBigDecimal("monto_acumulado"), rs.getLong("cantidad_compras")));
     }
 
-    // 7. Productos adquiridos con mayor frecuencia (numero de lineas de compra)
     public List<ReporteProductoFrecuenciaRespuesta> productosMasFrecuentesEnCompras() {
         String sql = """
                 SELECT p.id AS producto_id, p.codigo, p.nombre, COUNT(dc.id) AS veces_comprado,
@@ -160,9 +137,6 @@ public class ReporteServicio {
                 rs.getLong("veces_comprado"), rs.getLong("cantidad_total")));
     }
 
-    // ---------------- Ventas y clientes ----------------
-
-    // 8. Ventas dentro de un rango de fechas
     public List<VentaRespuesta> ventasEnRango(LocalDateTime desde, LocalDateTime hasta) {
         StringBuilder sql = new StringBuilder("""
                 SELECT v.id, v.numero_factura, v.cliente_id, cl.nombre AS cliente_nombre, cl.nit AS cliente_nit,
@@ -190,7 +164,6 @@ public class ReporteServicio {
                 parametros.toArray());
     }
 
-    // 9. Top 10 clientes con mayor monto acumulado de compras
     public List<ReporteClienteTopRespuesta> clientesTop() {
         String sql = """
                 SELECT cl.id AS cliente_id, cl.nombre, cl.nit, COALESCE(SUM(v.total), 0) AS monto_acumulado,
@@ -206,7 +179,6 @@ public class ReporteServicio {
                 rs.getBigDecimal("monto_acumulado"), rs.getLong("cantidad_compras")));
     }
 
-    // 10. Top 10 productos que han generado mayores ingresos
     public List<ReporteProductoIngresoRespuesta> productosMayorIngreso() {
         String sql = """
                 SELECT p.id AS producto_id, p.codigo, p.nombre, COALESCE(SUM(dv.subtotal), 0) AS ingreso_total,
@@ -222,13 +194,8 @@ public class ReporteServicio {
                 rs.getBigDecimal("ingreso_total"), rs.getLong("unidades_vendidas")));
     }
 
-    // 11. Resumen de ventas agrupado por periodo (dia, semana, mes o anio)
     public List<ReporteResumenPeriodoRespuesta> resumenVentasPorPeriodo(String periodo) {
-        // date_trunc necesita su primer argumento como literal, no como
-        // parametro con "?" (varios drivers/JDBC no lo aceptan bien alli). Es
-        // seguro concatenarlo porque NUNCA es el texto que mando el cliente
-        // directamente: solo puede ser uno de estos 4 valores fijos, ya
-        // validados por este switch.
+
         String claveDateTrunc = switch (periodo) {
             case "dia" -> "day";
             case "semana" -> "week";

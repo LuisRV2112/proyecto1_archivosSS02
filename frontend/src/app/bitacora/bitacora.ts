@@ -7,7 +7,6 @@ import { RegistroBitacora } from '../core/modelos/bitacora.model';
 import { UsuarioAdmin } from '../core/modelos/usuario-admin.model';
 import { mensajeDeError } from '../core/modelos/error.model';
 
-// Modulos tal como los escribe BitacoraServicio.registrar en el backend
 const MODULOS = [
   'AUTENTICACION',
   'CATEGORIAS',

@@ -23,7 +23,6 @@ public class Usuario {
     @Column(nullable = false, unique = true, length = 40)
     private String username;
 
-    // BCrypt, nunca texto plano
     @Column(name = "password_hash", nullable = false, length = 100)
     private String passwordHash;
 

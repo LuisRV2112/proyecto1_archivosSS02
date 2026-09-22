@@ -10,9 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
-// Se dispara cuando un usuario autenticado intenta un recurso que su rol no
-// tiene permitido (403). Igual que JwtAutenticacionEntryPoint, ocurre en la
-// cadena de filtros, antes del controlador.
 @Component
 public class JwtAccesoDenegadoManejador implements AccessDeniedHandler {
 

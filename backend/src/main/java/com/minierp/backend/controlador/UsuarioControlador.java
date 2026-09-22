@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-// Solo ADMINISTRACION (SecurityConfig, /api/usuarios/**)
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioControlador {
