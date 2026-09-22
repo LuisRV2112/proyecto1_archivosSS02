@@ -32,9 +32,6 @@ target/
 ### Mac OS ###
 .DS_Store
 
-### Instrucciones de fases (no se sube al repositorio) ###
-fases/
-
 ### Node / Angular ###
 node_modules/
 dist/
