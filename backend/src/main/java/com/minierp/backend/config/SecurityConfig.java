@@ -1,0 +1,126 @@
+package com.minierp.backend.config;
+
+import com.minierp.backend.seguridad.JwtAccesoDenegadoManejador;
+import com.minierp.backend.seguridad.JwtAutenticacionEntryPoint;
+import com.minierp.backend.seguridad.JwtAutenticacionFiltro;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+@Configuration
+public class SecurityConfig {
+
+    // Roles tal como se guardan en la tabla rol (sin el prefijo ROLE_, que
+    // Spring Security agrega solo al usar hasRole/hasAnyRole)
+    private static final String ADMINISTRACION = "ADMINISTRACION";
+    private static final String COMPRAS = "COMPRAS";
+    private static final String INVENTARIO = "INVENTARIO";
+    private static final String VENTAS = "VENTAS";
+
+    private final JwtAutenticacionFiltro jwtAutenticacionFiltro;
+    private final JwtAutenticacionEntryPoint jwtAutenticacionEntryPoint;
+    private final JwtAccesoDenegadoManejador jwtAccesoDenegadoManejador;
+
+    public SecurityConfig(
+            JwtAutenticacionFiltro jwtAutenticacionFiltro,
+            JwtAutenticacionEntryPoint jwtAutenticacionEntryPoint,
+            JwtAccesoDenegadoManejador jwtAccesoDenegadoManejador) {
+        this.jwtAutenticacionFiltro = jwtAutenticacionFiltro;
+        this.jwtAutenticacionEntryPoint = jwtAutenticacionEntryPoint;
+        this.jwtAccesoDenegadoManejador = jwtAccesoDenegadoManejador;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuracion) throws Exception {
+        return configuracion.getAuthenticationManager();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                // No hay cookies de sesion: cada peticion se autentica con su
+                // propio JWT en el header Authorization, asi que no existe el
+                // estado de sesion que un ataque CSRF necesita explotar.
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(manejo -> manejo
+                        .authenticationEntryPoint(jwtAutenticacionEntryPoint)
+                        .accessDeniedHandler(jwtAccesoDenegadoManejador))
+                .authorizeHttpRequests(reglas -> reglas
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/yo").authenticated()
+
+                        // Usuarios y bitacora: solo ADMINISTRACION (tabla, seccion 6)
+                        .requestMatchers("/api/usuarios/**").hasRole(ADMINISTRACION)
+                        .requestMatchers("/api/bitacora/**").hasRole(ADMINISTRACION)
+
+                        // Categorias: la lectura la necesitan las 4 areas (para listas
+                        // desplegables de productos); solo ADMIN e INVENTARIO escriben
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**")
+                        .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)
+                        .requestMatchers("/api/categorias/**").hasAnyRole(ADMINISTRACION, INVENTARIO)
+
+                        // Productos: lectura para las 4 areas, escritura solo ADMIN/INVENTARIO
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**")
+                        .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)
+                        .requestMatchers("/api/productos/**").hasAnyRole(ADMINISTRACION, INVENTARIO)
+
+                        .requestMatchers("/api/proveedores/**").hasAnyRole(ADMINISTRACION, COMPRAS)
+                        .requestMatchers("/api/compras/**").hasAnyRole(ADMINISTRACION, COMPRAS)
+
+                        // Alertas de stock: VENTAS no las tiene (tabla, seccion 6).
+                        // Existencias y kardex si son solo de lectura para las 4 areas.
+                        .requestMatchers("/api/inventario/alertas").hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO)
+                        .requestMatchers("/api/inventario/**")
+                        .hasAnyRole(ADMINISTRACION, COMPRAS, INVENTARIO, VENTAS)
+
+                        .requestMatchers("/api/clientes/**").hasAnyRole(ADMINISTRACION, VENTAS)
+                        .requestMatchers("/api/ventas/**").hasAnyRole(ADMINISTRACION, VENTAS)
+
+                        .requestMatchers("/api/reportes/productos/**", "/api/reportes/inventario/**")
+                        .hasAnyRole(ADMINISTRACION, INVENTARIO)
+                        .requestMatchers("/api/reportes/compras/**", "/api/reportes/proveedores/**")
+                        .hasAnyRole(ADMINISTRACION, COMPRAS)
+                        .requestMatchers("/api/reportes/ventas/**", "/api/reportes/clientes/**")
+                        .hasAnyRole(ADMINISTRACION, VENTAS)
+
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtAutenticacionFiltro, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuracion = new CorsConfiguration();
+        configuracion.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuracion.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuracion.setAllowedHeaders(List.of("*"));
+        configuracion.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource fuente = new UrlBasedCorsConfigurationSource();
+        fuente.registerCorsConfiguration("/**", configuracion);
+        return fuente;
+    }
+}
