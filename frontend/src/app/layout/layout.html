@@ -1,0 +1,21 @@
+<div class="contenedor-app">
+  <aside class="barra-lateral">
+    <div class="marca">Mini ERP</div>
+
+    <nav>
+      @for (item of menu(); track item.ruta) {
+        <a [routerLink]="item.ruta" routerLinkActive="activo">{{ item.etiqueta }}</a>
+      }
+    </nav>
+
+    <div class="usuario-actual">
+      <p class="nombre">{{ auth.usuario()?.nombreCompleto }}</p>
+      <p class="rol">{{ auth.usuario()?.rol }}</p>
+      <button class="boton-secundario" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <router-outlet></router-outlet>
+  </main>
+</div>

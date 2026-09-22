@@ -1,0 +1,24 @@
+<div class="pantalla-login">
+  <form class="tarjeta-login" [formGroup]="formulario" (ngSubmit)="ingresar()">
+    <h1>Mini ERP</h1>
+    <p class="subtitulo">Muebles del Hogar y Oficina</p>
+
+    @if (error()) {
+      <p class="mensaje-error">{{ error() }}</p>
+    }
+
+    <label>
+      Usuario
+      <input type="text" formControlName="username" autocomplete="username" />
+    </label>
+
+    <label>
+      Contraseña
+      <input type="password" formControlName="password" autocomplete="current-password" />
+    </label>
+
+    <button type="submit" [disabled]="formulario.invalid || cargando()">
+      {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </form>
+</div>

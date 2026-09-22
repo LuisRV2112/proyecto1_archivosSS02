@@ -1,0 +1,73 @@
+.contenedor-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.barra-lateral {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--color-primario-oscuro);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0;
+}
+
+.marca {
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 0 1.25rem 1.25rem;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+nav a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+nav a.activo {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-weight: 600;
+}
+
+.usuario-actual {
+  padding: 1rem 1.25rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  margin-top: 1rem;
+}
+
+.usuario-actual .nombre {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.usuario-actual .rol {
+  margin: 0.15rem 0 0.75rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.usuario-actual .boton-secundario {
+  width: 100%;
+  color: white;
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.contenido {
+  flex: 1;
+  padding: 1.75rem;
+  overflow-x: auto;
+}

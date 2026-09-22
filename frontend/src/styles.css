@@ -1,0 +1,95 @@
+:root {
+  --color-primario: #2f5d50;
+  --color-primario-oscuro: #234439;
+  --color-fondo: #f5f6f4;
+  --color-superficie: #ffffff;
+  --color-borde: #dcdfdc;
+  --color-texto: #1f2421;
+  --color-texto-suave: #5c665f;
+  --color-error: #b3261e;
+  --color-error-fondo: #fdecea;
+  --radio: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-superficie);
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--color-borde);
+  font-size: 0.9rem;
+}
+
+th {
+  background: #eef1ef;
+  font-weight: 600;
+}
+
+.tarjeta {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  padding: 1.25rem;
+}
+
+.boton {
+  background: var(--color-primario);
+  color: white;
+  border: none;
+  border-radius: var(--radio);
+  padding: 0.55rem 1.1rem;
+  font-size: 0.95rem;
+}
+
+.boton:hover:not(:disabled) {
+  background: var(--color-primario-oscuro);
+}
+
+.boton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.boton-secundario {
+  background: transparent;
+  color: var(--color-primario);
+  border: 1px solid var(--color-primario);
+}
+
+.boton-peligro {
+  background: var(--color-error);
+}
+
+.mensaje-error {
+  background: var(--color-error-fondo);
+  color: var(--color-error);
+  border-radius: var(--radio);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
